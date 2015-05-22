@@ -3,6 +3,7 @@ package com.shawric.overlords;
 import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
+import net.minecraftforge.common.config.Configuration;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.SidedProxy;
@@ -19,6 +20,8 @@ public class Overlords {
 	
 	public static Common proxy;
 	
+	public boolean explProtConfig;
+	
 	int entIDCount = 50;
 	
 	public static final String modid = "shawric_overlords";
@@ -31,6 +34,13 @@ public class Overlords {
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event)
 	{
+		
+		
+		Configuration config = new Configuration(event.getSuggestedConfigurationFile());
+		config.load();
+		explProtConfig = config.get(Configuration.CATEGORY_GENERAL, "Enable_Explosion_Protection_From_ClaimBlocks", false).getBoolean(false);
+		config.save();
+		
 		
 		 overlordBlock = new OverlordBlock("overlordBlock", 1, 200);
 		 GameRegistry.registerTileEntity(OverlordBlockTileEntity.class, "OverlordBlockID"+this.getUniqeEntID());
