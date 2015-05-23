@@ -5,6 +5,7 @@ import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -25,7 +26,7 @@ public class OverlordBlockTileEntity extends TileEntity {
 
 	
 	//the Overlord's domain
-	private ArrayList<String> chunkList;
+	private ArrayList<EntityPlayer> playerList;
 	
 	public String chunkListString = "z";
 	public String overlordName = "unamed";
@@ -230,7 +231,31 @@ public class OverlordBlockTileEntity extends TileEntity {
 		
 	}
 	
+	private void checkDomainForPlayers(){
+		
+
+		String[] chunkCoordsList = this.chunkListString.split(";");
+		
+		for(int i = 0; i<chunkCoordsList.length; i++){
+			
+			String[] indChunkCoords = chunkCoordsList[i].split(",");
+			
+			int chunkX = new Integer(indChunkCoords[0]);
+			int chunkZ = new Integer(indChunkCoords[1]);
+			
+			Chunk chunkToCheckForPlayers = this.worldObj.getChunkFromChunkCoords(chunkX, chunkZ);
+			
+			//chunkToCheckForPlayers.
+		}
+		
+		
+	}
 	
+	public void addPlayerToDomain(EntityPlayer player){
+		
+		playerList.add(player);
+		
+	}
 	
 	
 	@Override
