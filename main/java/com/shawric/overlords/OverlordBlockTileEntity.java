@@ -24,7 +24,9 @@ public class OverlordBlockTileEntity extends TileEntity {
     private String name = "overlordBlockTileEntity";
     private Chunk placedChunk;
 
-	
+    private ItemStack[] itemStackArray = new ItemStack[1];
+    private TileEntityChest[] chestArray = new TileEntityChest[6];
+    
 	//the Overlord's domain
 	private ArrayList<EntityPlayer> playerList;
 	
@@ -143,6 +145,24 @@ public class OverlordBlockTileEntity extends TileEntity {
 	private boolean eatItem(){
 		
 		
+		for( int i = 0; i<this.chestArray.length; i++ ){
+			
+			if(!(this.chestArray[i]==null)){
+			
+				for(int i2 = 0; i2<=this.chestArray[i].getSizeInventory(); i++){
+					
+					ItemStack tstStack = this.chestArray[i].getStackInSlot(i2);
+					
+					//tstStack;
+					
+				}
+				
+			}
+			
+			
+		}
+		
+		
 		return false;
 		
 	}
@@ -186,6 +206,8 @@ public class OverlordBlockTileEntity extends TileEntity {
 			if(checkTileEntity1 instanceof TileEntityChest){
 				
 				//do chest stuff here
+				this.chestArray[2]=(TileEntityChest) checkTileEntity1;
+				
 				System.out.println("---THERE IS A CHEST HERE---");
 				
 				
@@ -196,6 +218,9 @@ public class OverlordBlockTileEntity extends TileEntity {
 			TileEntity checkTileEntity2 = this.worldObj.getTileEntity((x-1), y, z);
 				if(checkTileEntity2 instanceof TileEntityChest){
 					//do chest stuff here
+					
+					this.chestArray[3]=(TileEntityChest) checkTileEntity2;
+					
 					System.out.println("---THERE IS A CHEST HERE---");
 					}
 		}
@@ -203,6 +228,8 @@ public class OverlordBlockTileEntity extends TileEntity {
 			TileEntity checkTileEntity3 = this.worldObj.getTileEntity(x, y, (z+1));
 			if(checkTileEntity3 instanceof TileEntityChest){
 				//do chest stuff here
+				
+				this.chestArray[4]=(TileEntityChest) checkTileEntity3;
 				System.out.println("---THERE IS A CHEST HERE---");
 				}
 		}
@@ -210,6 +237,8 @@ public class OverlordBlockTileEntity extends TileEntity {
 			TileEntity checkTileEntity4 = this.worldObj.getTileEntity(x, y, (z-1));
 			if(checkTileEntity4 instanceof TileEntityChest){
 				//do chest stuff here
+				
+				this.chestArray[5]=(TileEntityChest) checkTileEntity4;
 				System.out.println("---THERE IS A CHEST HERE---");
 				}
 		}
@@ -217,6 +246,8 @@ public class OverlordBlockTileEntity extends TileEntity {
 			TileEntity checkTileEntity5 = this.worldObj.getTileEntity(x, y+1, z);
 			if(checkTileEntity5 instanceof TileEntityChest){
 				//do chest stuff here
+				
+				this.chestArray[0]=(TileEntityChest) checkTileEntity5;
 				System.out.println("---THERE IS A CHEST HERE---");
 				}
 		}
@@ -224,6 +255,9 @@ public class OverlordBlockTileEntity extends TileEntity {
 			TileEntity checkTileEntity6 = this.worldObj.getTileEntity(x, y-1, z);
 			if(checkTileEntity6 instanceof TileEntityChest){
 				//do chest stuff here
+				
+				this.chestArray[1]=(TileEntityChest) checkTileEntity6;
+				
 				System.out.println("---THERE IS A CHEST HERE---");
 				}
 		}
