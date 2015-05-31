@@ -21,12 +21,13 @@ public class OverlordBlockTileEntity extends TileEntity {
 
 	public static final String publicName = "overlordBlockTileEntity";
 
-	private static String itemToEat = "cobblestone";
+	private static String[] itemToEatList = {"cobblestone","stone","dirt","gravel","sand"};
+	private String itemDesired;
 	
     private String name = "overlordBlockTileEntity";
     private Chunk placedChunk;
 
-    private ItemStack[] itemStackArray = new ItemStack[1];
+    
     private TileEntityChest[] chestArray = new TileEntityChest[6];
     
 	//the Overlord's domain
@@ -38,14 +39,16 @@ public class OverlordBlockTileEntity extends TileEntity {
 	private int hungerLevel;
 	private int hungerTimeCheck=0;
 	
-	private int hungerSatedLevel=10;
-	private boolean overlordHungerSated;
+	private int hungerSatedLevel=0;
+	private boolean overlordHungerSatedBooleon = false;
 	
 	private int overlordLevel=1;
 	private int angerLevel;
 	
 	private boolean sentToEventList;
 	private int timeCheck=0;
+
+	
 	
 	
 	
@@ -56,10 +59,17 @@ public class OverlordBlockTileEntity extends TileEntity {
 		this.sentToEventList = false;
 		this.generateOverlordName();
 		this.timeCheck = 0;
-		
-
+		this.randomSetItemDesired();
 	}
 
+	
+	
+	private void randomSetItemDesired(){
+		
+		Random ranEat= new Random();
+		this.itemDesired = itemToEatList[ranEat.nextInt(itemToEatList.length)];
+		
+	}
 	
 	
 	@Override
@@ -70,7 +80,7 @@ public class OverlordBlockTileEntity extends TileEntity {
 		//REMOVED THE ONCE ONLY BOOLEAN FOR TEST PURPOSES
 		// && this.sentToEventList==false)
 		  if(!this.worldObj.isRemote){   
-		   if (this.timeCheck < 40){
+		   if (this.timeCheck < 120){
 			   ++this.timeCheck;	   
 		   }else{  
 					   System.out.println("---!!!SENDING UPDATE TO EH!!!---");
@@ -90,17 +100,16 @@ public class OverlordBlockTileEntity extends TileEntity {
 				   ++this.hungerTimeCheck;
 				   
 			   }else{  
-						   System.out.println("---IM HUNGRY FEED ME!---");
+						   System.out.println("---I FEED!---");
 						   ++this.hungerTimeCheck;
 						   
-						   this.eatItem();
 						   this.checkHunger();
 						   this.markDirty();
 						 
 			        }  
 		  }
 		   //timer resets
-		   if (this.timeCheck > 40){this.timeCheck=0;}
+		   if (this.timeCheck > 120){this.timeCheck=0;}
 		   if (this.hungerTimeCheck > 120){this.hungerTimeCheck=0;}
 	   }
 	
@@ -135,12 +144,20 @@ public class OverlordBlockTileEntity extends TileEntity {
 		//if so, eat the item, and increase sated level to max
 		//if not, increase hunger level
 		
-		//this.overlordHungerSated=this.eatItem();
+		System.out.println("---I CRAVE "+ this.itemDesired + "---");
 		
-		if(!this.overlordHungerSated){
+		if(this.hungerSatedLevel < 1){
 			
+			this.eatItem();
+			
+			if(this.overlordHungerSatedBooleon==false)
+			{
 			System.out.println("---MY HUNGER GROWS---");
 			this.hungerLevel++;
+			}
+			
+		}else{
+			this.hungerSatedLevel--;
 		}
 		
 	}
@@ -150,14 +167,30 @@ public class OverlordBlockTileEntity extends TileEntity {
 		
 		
 		for( int i = 0; i<this.chestArray.length; i++ ){
+			
 			if(!(this.chestArray[i]==null)){
+				
 				for(int i2 = 0; i2<this.chestArray[i].getSizeInventory(); i2++){
+					
 					if(!(this.chestArray[i].getStackInSlot(i2)==null)){
 					ItemStack tstStack = this.chestArray[i].getStackInSlot(i2);
-					System.out.println("---I FOUND "+tstStack.getDisplayName()+" in chest "+i+"---");		
-						if(tstStack.getDisplayName().equalsIgnoreCase(itemToEat)){
+					
+					System.out.println("---I FOUND "+tstStack.getDisplayName()+" in chest "+i+"---");
+					
+						if(tstStack.getDisplayName().equalsIgnoreCase(itemDesired) && this.overlordHungerSatedBooleon==false){
 							
-						}
+							//need check stack size to see if its enough to satisfy hunger level
+							
+							ItemStack eatenStack = this.chestArray[i].decrStackSize(i2,(this.hungerLevel));
+							
+							
+							
+							
+							this.hungerSatedLevel=5;
+							this.hungerLevel=0;
+							this.overlordHungerSatedBooleon = true;
+							this.randomSetItemDesired();
+						}else{this.overlordHungerSatedBooleon = false;}
 					}	
 				}	
 			}
@@ -203,54 +236,59 @@ public class OverlordBlockTileEntity extends TileEntity {
 				//do chest stuff here
 				//EAST CHEST
 				this.chestArray[2]=(TileEntityChest) checkTileEntity1;
-				System.out.println("---THERE IS A CHEST HERE---");
-				}
-		}
+				//System.out.println("---THERE IS A CHEST HERE---");
+				}else{this.chestArray[2]=null;}
+		}else{this.chestArray[2]=null;}
+		
 		if(blockToCheck2.hasTileEntity(0)){
 			TileEntity checkTileEntity2 = this.worldObj.getTileEntity((x-1), y, z);
 				if(checkTileEntity2 instanceof TileEntityChest){
 					//do chest stuff here
 					//WEST CHEST
 					this.chestArray[3]=(TileEntityChest) checkTileEntity2;
-					System.out.println("---THERE IS A CHEST HERE---");
-					}
-		}
+					//System.out.println("---THERE IS A CHEST HERE---");
+					}else{this.chestArray[3]=null;}
+		}else{this.chestArray[3]=null;}
+		
 		if(blockToCheck3.hasTileEntity(0)){
 			TileEntity checkTileEntity3 = this.worldObj.getTileEntity(x, y, (z+1));
 			if(checkTileEntity3 instanceof TileEntityChest){
 				//do chest stuff here
 				//SOUTH CHEST
 				this.chestArray[4]=(TileEntityChest) checkTileEntity3;
-				System.out.println("---THERE IS A CHEST HERE---");
-				}
-		}
+				//System.out.println("---THERE IS A CHEST HERE---");
+				}else{this.chestArray[4]=null;}
+		}else{this.chestArray[4]=null;}
+		
 		if(blockToCheck4.hasTileEntity(0)){
 			TileEntity checkTileEntity4 = this.worldObj.getTileEntity(x, y, (z-1));
 			if(checkTileEntity4 instanceof TileEntityChest){
 				//do chest stuff here
 				//NORTH CHEST
 				this.chestArray[5]=(TileEntityChest) checkTileEntity4;
-				System.out.println("---THERE IS A CHEST HERE---");
-				}
-		}
+				//System.out.println("---THERE IS A CHEST HERE---");
+				}else{this.chestArray[5]=null;}
+		}else{this.chestArray[5]=null;}
+		
 		if(blockToCheck5.hasTileEntity(0)){
 			TileEntity checkTileEntity5 = this.worldObj.getTileEntity(x, y+1, z);
 			if(checkTileEntity5 instanceof TileEntityChest){
 				//do chest stuff here
 				//TOP CHEST
 				this.chestArray[0]=(TileEntityChest) checkTileEntity5;
-				System.out.println("---THERE IS A CHEST HERE---");
-				}
-		}
+				//System.out.println("---THERE IS A CHEST HERE---");
+				}else{this.chestArray[0]=null;}
+		}else{this.chestArray[0]=null;}
+		
 		if(blockToCheck6.hasTileEntity(0)){
 			TileEntity checkTileEntity6 = this.worldObj.getTileEntity(x, y-1, z);
 			if(checkTileEntity6 instanceof TileEntityChest){
 				//do chest stuff here
 				//BOTTOM CHEST
 				this.chestArray[1]=(TileEntityChest) checkTileEntity6;
-				System.out.println("---THERE IS A CHEST HERE---");
-				}
-		}
+				//System.out.println("---THERE IS A CHEST HERE---");
+				}else{this.chestArray[1]=null;}
+		}else{this.chestArray[1]=null;}
 		
 		
 	}
