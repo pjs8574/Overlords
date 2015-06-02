@@ -181,15 +181,18 @@ public class OverlordBlockTileEntity extends TileEntity {
 							
 							//need check stack size to see if its enough to satisfy hunger level
 							
+							ItemStack stackToEat = this.chestArray[i].getStackInSlot(i2);
+							
+							if(stackToEat.stackSize<this.hungerLevel){
+								this.overlordHungerSatedBooleon = false;
+								System.out.println("---I REQURE MORE "+itemDesired+"");
+							}else{
 							ItemStack eatenStack = this.chestArray[i].decrStackSize(i2,(this.hungerLevel));
-							
-							
-							
-							
 							this.hungerSatedLevel=5;
 							this.hungerLevel=0;
 							this.overlordHungerSatedBooleon = true;
 							this.randomSetItemDesired();
+							}
 						}else{this.overlordHungerSatedBooleon = false;}
 					}	
 				}	
