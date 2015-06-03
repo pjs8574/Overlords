@@ -100,7 +100,7 @@ public class OverlordBlockTileEntity extends TileEntity {
 				   ++this.hungerTimeCheck;
 				   
 			   }else{  
-						   System.out.println("---I FEED!---");
+						   
 						   ++this.hungerTimeCheck;
 						   
 						   this.checkHunger();
@@ -187,13 +187,15 @@ public class OverlordBlockTileEntity extends TileEntity {
 							
 							if(stackToEat.stackSize<howManyToEat){
 								this.overlordHungerSatedBooleon = false;
-								System.out.println("---I REQURE "+ (howManyToEat-stackToEat.stackSize) + " MORE "+itemDesired+"");
+								System.out.println("---I REQURE "+ ((howManyToEat-stackToEat.stackSize)+1) + " MORE "+itemDesired+"");
 							}else{
 	
 							ItemStack eatenStack = this.chestArray[i].decrStackSize(i2,(howManyToEat));
 							this.hungerSatedLevel=5;
 							this.hungerLevel=0;
 							this.overlordHungerSatedBooleon = true;
+							System.out.println("---MY HUNGER IS SATED....FOR NOW.");
+							
 							this.randomSetItemDesired();
 							}
 						}else{this.overlordHungerSatedBooleon = false;}
