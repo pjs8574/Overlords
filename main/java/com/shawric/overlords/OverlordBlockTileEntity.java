@@ -6,6 +6,7 @@ import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -13,6 +14,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
@@ -27,11 +29,13 @@ public class OverlordBlockTileEntity extends TileEntity {
     private String name = "overlordBlockTileEntity";
     private Chunk placedChunk;
 
+    private ArrayList<EntityPlayer> domainPlayerList = new ArrayList<EntityPlayer>();
+    private ArrayList<EntityPlayer> boundPlayerList = new ArrayList<EntityPlayer>();
     
     private TileEntityChest[] chestArray = new TileEntityChest[6];
     
 	//the Overlord's domain
-	private ArrayList<EntityPlayer> playerList;
+	
 	
 	public String chunkListString = "z";
 	public String overlordName = "unamed";
@@ -47,6 +51,10 @@ public class OverlordBlockTileEntity extends TileEntity {
 	
 	private boolean sentToEventList;
 	private int timeCheck=0;
+
+	private double overlordExpeirence;
+
+	
 
 	
 	
@@ -87,6 +95,7 @@ public class OverlordBlockTileEntity extends TileEntity {
 					   ++this.timeCheck;
 					   this.setDomain();
 					   this.getInventories();
+					   this.checkDomainForPlayers();
 					   this.markDirty();
 					   this.sentToEventList = true;
 		        }  
@@ -145,6 +154,8 @@ public class OverlordBlockTileEntity extends TileEntity {
 		//if not, increase hunger level
 		
 		System.out.println("---I CRAVE "+ this.itemDesired + "---");
+		this.sendMessageToDomain("---I CRAVE "+ this.itemDesired + "---");
+		
 		
 		if(this.hungerSatedLevel < 1){
 			
@@ -152,7 +163,7 @@ public class OverlordBlockTileEntity extends TileEntity {
 			
 			if(this.overlordHungerSatedBooleon==false)
 			{
-			System.out.println("---MY HUNGER GROWS---");
+				this.sendMessageToDomain("---MY HUNGER GROWS---");
 			this.hungerLevel++;
 			}
 			
@@ -188,9 +199,17 @@ public class OverlordBlockTileEntity extends TileEntity {
 							if(stackToEat.stackSize<howManyToEat){
 								this.overlordHungerSatedBooleon = false;
 								System.out.println("---I REQURE "+ ((howManyToEat-stackToEat.stackSize)+1) + " MORE "+itemDesired+"");
+								
+								this.sendMessageToDomain("---I REQURE "+ ((howManyToEat-stackToEat.stackSize)+1) + " MORE "+itemDesired+"");
+								
 							}else{
 	
 							ItemStack eatenStack = this.chestArray[i].decrStackSize(i2,(howManyToEat));
+							
+							this.overlordExpeirence = overlordExpeirence +.01;
+							
+							this.checkOverlordLevel();
+							
 							this.hungerSatedLevel=5;
 							this.hungerLevel=0;
 							this.overlordHungerSatedBooleon = true;
@@ -206,6 +225,32 @@ public class OverlordBlockTileEntity extends TileEntity {
 		
 	}
 	
+	private void checkOverlordLevel() {
+		
+		if((this.overlordExpeirence/10)>=this.overlordLevel){
+			
+			this.overlordLevel++;
+			
+			System.out.println("MY POWER GROWS!");
+		}
+		
+	}
+
+
+	
+	private void sendMessageToDomain(String message){
+		
+		if(!(this.domainPlayerList.isEmpty())){
+			
+			for (int i = 0; i <this.domainPlayerList.size(); ++i){
+				    	EntityPlayerMP targetPlayer = (EntityPlayerMP)this.domainPlayerList.get(i);
+				    	targetPlayer.addChatMessage(new ChatComponentText(message));
+			}
+		}
+		
+	}
+	
+
 	private void generateOverlordName(){
 		
 		if(this.overlordName.contains("unamed")){
@@ -241,60 +286,60 @@ public class OverlordBlockTileEntity extends TileEntity {
 		if(blockToCheck1.hasTileEntity(0)){
 			TileEntity checkTileEntity1 = this.worldObj.getTileEntity((x+1), y, z);
 			if(checkTileEntity1 instanceof TileEntityChest){
-				//do chest stuff here
+				
 				//EAST CHEST
 				this.chestArray[2]=(TileEntityChest) checkTileEntity1;
-				//System.out.println("---THERE IS A CHEST HERE---");
+				
 				}else{this.chestArray[2]=null;}
 		}else{this.chestArray[2]=null;}
 		
 		if(blockToCheck2.hasTileEntity(0)){
 			TileEntity checkTileEntity2 = this.worldObj.getTileEntity((x-1), y, z);
 				if(checkTileEntity2 instanceof TileEntityChest){
-					//do chest stuff here
+					
 					//WEST CHEST
 					this.chestArray[3]=(TileEntityChest) checkTileEntity2;
-					//System.out.println("---THERE IS A CHEST HERE---");
+					
 					}else{this.chestArray[3]=null;}
 		}else{this.chestArray[3]=null;}
 		
 		if(blockToCheck3.hasTileEntity(0)){
 			TileEntity checkTileEntity3 = this.worldObj.getTileEntity(x, y, (z+1));
 			if(checkTileEntity3 instanceof TileEntityChest){
-				//do chest stuff here
+				
 				//SOUTH CHEST
 				this.chestArray[4]=(TileEntityChest) checkTileEntity3;
-				//System.out.println("---THERE IS A CHEST HERE---");
+				
 				}else{this.chestArray[4]=null;}
 		}else{this.chestArray[4]=null;}
 		
 		if(blockToCheck4.hasTileEntity(0)){
 			TileEntity checkTileEntity4 = this.worldObj.getTileEntity(x, y, (z-1));
 			if(checkTileEntity4 instanceof TileEntityChest){
-				//do chest stuff here
+				
 				//NORTH CHEST
 				this.chestArray[5]=(TileEntityChest) checkTileEntity4;
-				//System.out.println("---THERE IS A CHEST HERE---");
+				
 				}else{this.chestArray[5]=null;}
 		}else{this.chestArray[5]=null;}
 		
 		if(blockToCheck5.hasTileEntity(0)){
 			TileEntity checkTileEntity5 = this.worldObj.getTileEntity(x, y+1, z);
 			if(checkTileEntity5 instanceof TileEntityChest){
-				//do chest stuff here
+				
 				//TOP CHEST
 				this.chestArray[0]=(TileEntityChest) checkTileEntity5;
-				//System.out.println("---THERE IS A CHEST HERE---");
+				
 				}else{this.chestArray[0]=null;}
 		}else{this.chestArray[0]=null;}
 		
 		if(blockToCheck6.hasTileEntity(0)){
 			TileEntity checkTileEntity6 = this.worldObj.getTileEntity(x, y-1, z);
 			if(checkTileEntity6 instanceof TileEntityChest){
-				//do chest stuff here
+				
 				//BOTTOM CHEST
 				this.chestArray[1]=(TileEntityChest) checkTileEntity6;
-				//System.out.println("---THERE IS A CHEST HERE---");
+				
 				}else{this.chestArray[1]=null;}
 		}else{this.chestArray[1]=null;}
 		
@@ -303,27 +348,39 @@ public class OverlordBlockTileEntity extends TileEntity {
 	
 	private void checkDomainForPlayers(){
 		
+		for (int i2 = 0; i2 <this.worldObj.playerEntities.size(); ++i2){
+      		
+	    	EntityPlayer targetPlayer = (EntityPlayer)this.worldObj.playerEntities.get(i2);
 
-		String[] chunkCoordsList = this.chunkListString.split(";");
-		
-		for(int i = 0; i<chunkCoordsList.length; i++){
+			String[] chunkCoordsList = this.chunkListString.split(";");
 			
-			String[] indChunkCoords = chunkCoordsList[i].split(",");
-			
-			int chunkX = new Integer(indChunkCoords[0]);
-			int chunkZ = new Integer(indChunkCoords[1]);
-			
-			Chunk chunkToCheckForPlayers = this.worldObj.getChunkFromChunkCoords(chunkX, chunkZ);
-			
-			//chunkToCheckForPlayers.
+			for(int i = 0; i<chunkCoordsList.length; i++){
+				
+				String[] indChunkCoords = chunkCoordsList[i].split(",");
+				
+				int chunkX = new Integer(indChunkCoords[0]);
+				int chunkZ = new Integer(indChunkCoords[1]);
+				
+				if((targetPlayer.chunkCoordX == chunkX) && (targetPlayer.chunkCoordZ == chunkZ)){
+					
+					if(!(domainPlayerList.contains(targetPlayer))){
+						domainPlayerList.add(targetPlayer);
+					}
+
+				}else{/*REMOVE PLAYER FROM DOMAIN LIST */
+					if((domainPlayerList.contains(targetPlayer))){
+						domainPlayerList.remove(targetPlayer);
+					}
+				}
+	
+			}
 		}
-		
 		
 	}
 	
-	public void addPlayerToDomain(EntityPlayer player){
+	public void addBoundPlayerToDomain(EntityPlayer player){
 		
-		playerList.add(player);
+		boundPlayerList.add(player);
 		
 	}
 	
