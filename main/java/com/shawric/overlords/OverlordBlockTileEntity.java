@@ -54,15 +54,14 @@ public class OverlordBlockTileEntity extends TileEntity {
 
 	private double overlordExpeirence;
 
-	
+	private int totalAmountOfDesiredItem;
 
-	
-	
+
 	
 	
 	public OverlordBlockTileEntity() {
 
-		System.out.println("---!!!this.sentToEventList!!!---"+this.sentToEventList);
+		
 		System.out.println("---!!!Overlord BLOCK CONSTRUCTOR TRIGGERED!!!---");
 		this.sentToEventList = false;
 		this.generateOverlordName();
@@ -75,7 +74,7 @@ public class OverlordBlockTileEntity extends TileEntity {
 	private void randomSetItemDesired(){
 		
 		Random ranEat= new Random();
-		this.itemDesired = itemToEatList[ranEat.nextInt(itemToEatList.length)];
+		this.setItemDesired(itemToEatList[ranEat.nextInt(itemToEatList.length)]);
 		
 	}
 	
@@ -136,7 +135,7 @@ public class OverlordBlockTileEntity extends TileEntity {
 		//Semicolon separates the chunk
 		this.chunkListString = (chunkX)+","+(chunkZ+1)+";"+ (chunkX+1)+","+(chunkZ-1)+";"+ (chunkX+1)+","+(chunkZ)+";"
 				+(chunkX-1)+","+(chunkZ)+";"+(chunkX+1)+","+(chunkZ+1)+";"+(chunkX+1)+","+(chunkZ-1)+";"+(chunkX-1)+","
-				+(chunkZ+1)+";"+(chunkX-1)+","+(chunkZ-1)+";";
+				+(chunkZ+1)+";"+(chunkX-1)+","+(chunkZ-1)+";"+(chunkX)+","+(chunkZ)+";";
 		
 		
 	}
@@ -153,8 +152,9 @@ public class OverlordBlockTileEntity extends TileEntity {
 		//if so, eat the item, and increase sated level to max
 		//if not, increase hunger level
 		
-		System.out.println("---I CRAVE "+ this.itemDesired + "---");
-		this.sendMessageToDomain("---I CRAVE "+ this.itemDesired + "---");
+		//System.out.println("---I CRAVE "+ this.itemDesired + "---");
+		//System.out.println("---SatedLevel -  "+ hungerSatedLevel + "---");
+		this.sendMessageToDomain("I CRAVE "+ this.getItemDesired()+".");
 		
 		
 		if(this.hungerSatedLevel < 1){
@@ -163,7 +163,7 @@ public class OverlordBlockTileEntity extends TileEntity {
 			
 			if(this.overlordHungerSatedBooleon==false)
 			{
-				this.sendMessageToDomain("---MY HUNGER GROWS---");
+				this.sendMessageToDomain("MY HUNGER GROWS.");
 			this.hungerLevel++;
 			}
 			
@@ -176,6 +176,9 @@ public class OverlordBlockTileEntity extends TileEntity {
 	
 	private void eatItem(){
 		
+		this.totalAmountOfDesiredItem =  (this.hungerLevel+this.overlordLevel)*this.overlordLevel;
+		
+		int totalDesiredItemInChests=0;
 		
 		for( int i = 0; i<this.chestArray.length; i++ ){
 			
@@ -186,21 +189,81 @@ public class OverlordBlockTileEntity extends TileEntity {
 					if(!(this.chestArray[i].getStackInSlot(i2)==null)){
 					ItemStack tstStack = this.chestArray[i].getStackInSlot(i2);
 					
-					System.out.println("---I FOUND "+tstStack.getDisplayName()+" in chest "+i+"---");
+					//System.out.println("---I FOUND "+tstStack.getDisplayName()+" in chest "+i+"---");
 					
-						if(tstStack.getDisplayName().equalsIgnoreCase(itemDesired) && this.overlordHungerSatedBooleon==false){
+						if(tstStack.getDisplayName().equalsIgnoreCase(this.getItemDesired())){
+							//running tally of number of desired item in the chests
+							//this is needed when desire goes over stack limit of 64
+							totalDesiredItemInChests+=tstStack.stackSize;
+						}
+						
+					}
+				}
+			}		
+		}			
+		
+		this.sendMessageToDomain("Total in chests:"+totalDesiredItemInChests);
+		this.sendMessageToDomain("Total desired:"+this.totalAmountOfDesiredItem);
+		
+		if(totalDesiredItemInChests>=this.totalAmountOfDesiredItem ){
+
+			for( int i = 0; i<this.chestArray.length; i++ ){
+				if(!(this.chestArray[i]==null)){
+					for(int i2 = 0; i2<this.chestArray[i].getSizeInventory(); i2++){
+						if(!(this.chestArray[i].getStackInSlot(i2)==null)){
+						
+							ItemStack stackToEat = this.chestArray[i].getStackInSlot(i2);
+
+							if(stackToEat.getDisplayName().equalsIgnoreCase(this.getItemDesired())){
+								
+								if(this.totalAmountOfDesiredItem>stackToEat.stackSize){
+									totalDesiredItemInChests -= stackToEat.stackSize;
+									this.totalAmountOfDesiredItem -=stackToEat.stackSize;
+									ItemStack eatenStack = this.chestArray[i].decrStackSize(i2,(stackToEat.stackSize));
+								}else{
+									if(this.totalAmountOfDesiredItem>0){
+										ItemStack eatenStack = this.chestArray[i].decrStackSize(i2,(this.totalAmountOfDesiredItem));
+										this.totalAmountOfDesiredItem=0;
+										this.overlordExpeirence = overlordExpeirence +.01;
+										this.checkOverlordLevel();
+										this.hungerSatedLevel=5;
+										this.hungerLevel=0;
+										this.overlordHungerSatedBooleon = true;
+										this.sendMessageToDomain("MY HUNGER IS SATED....FOR NOW.");
+										this.randomSetItemDesired();
+									}
+								}
+				
+		}}}}}}else{
+			this.sendMessageToDomain("I REQURE "+ ((this.totalAmountOfDesiredItem-totalDesiredItemInChests)) + " MORE "+this.getItemDesired()+"");
+			this.overlordHungerSatedBooleon = false;
+		}
+			
+			
+		
+		
+		
+		
+		
+		
+		
+		
+		
+						/*
+					
+						if(tstStack.getDisplayName().equalsIgnoreCase(this.getItemDesired()) && this.overlordHungerSatedBooleon==false){
 							
 							//need check stack size to see if its enough to satisfy hunger level
 							
 							ItemStack stackToEat = this.chestArray[i].getStackInSlot(i2);
 							
-							int howManyToEat = this.hungerLevel*this.overlordLevel;
+							int howManyToEat = this.totalAmountOfDesiredItem;
 							
-							if(stackToEat.stackSize<howManyToEat){
+							if(stackToEat.stackSize<howManyToEat || howManyToEat>64){
 								this.overlordHungerSatedBooleon = false;
-								System.out.println("---I REQURE "+ ((howManyToEat-stackToEat.stackSize)+1) + " MORE "+itemDesired+"");
+								//System.out.println("---I REQURE "+ ((howManyToEat-stackToEat.stackSize)+1) + " MORE "+itemDesired+"");
 								
-								this.sendMessageToDomain("---I REQURE "+ ((howManyToEat-stackToEat.stackSize)+1) + " MORE "+itemDesired+"");
+								this.sendMessageToDomain("I REQURE "+ ((howManyToEat-stackToEat.stackSize)+1) + " MORE "+this.getItemDesired()+"");
 								
 							}else{
 	
@@ -213,15 +276,16 @@ public class OverlordBlockTileEntity extends TileEntity {
 							this.hungerSatedLevel=5;
 							this.hungerLevel=0;
 							this.overlordHungerSatedBooleon = true;
-							System.out.println("---MY HUNGER IS SATED....FOR NOW.");
+							this.sendMessageToDomain("MY HUNGER IS SATED....FOR NOW.");
 							
 							this.randomSetItemDesired();
 							}
 						}else{this.overlordHungerSatedBooleon = false;}
-					}	
-				}	
-			}
-		}
+						
+						
+						*/
+						
+		
 		
 	}
 	
@@ -231,7 +295,8 @@ public class OverlordBlockTileEntity extends TileEntity {
 			
 			this.overlordLevel++;
 			
-			System.out.println("MY POWER GROWS!");
+			this.sendMessageToDomain("MY POWER GROWS!");
+			
 		}
 		
 	}
@@ -240,11 +305,12 @@ public class OverlordBlockTileEntity extends TileEntity {
 	
 	private void sendMessageToDomain(String message){
 		
+		
 		if(!(this.domainPlayerList.isEmpty())){
-			
+				
 			for (int i = 0; i <this.domainPlayerList.size(); ++i){
-				    	EntityPlayerMP targetPlayer = (EntityPlayerMP)this.domainPlayerList.get(i);
-				    	targetPlayer.addChatMessage(new ChatComponentText(message));
+				    	EntityPlayer targetPlayer = (EntityPlayer)this.domainPlayerList.get(i);
+				    	targetPlayer.addChatMessage(new ChatComponentText("Overlord "+this.overlordName+": "+message));
 			}
 		}
 		
@@ -265,7 +331,7 @@ public class OverlordBlockTileEntity extends TileEntity {
 		    }	
 		}
 		
-    	System.out.println("COWER MORTAL FOR MY NAME IS: "+this.overlordName);
+    	//System.out.println("COWER MORTAL FOR MY NAME IS: "+this.overlordName);
 		
 	}
 	
@@ -361,20 +427,19 @@ public class OverlordBlockTileEntity extends TileEntity {
 				int chunkX = new Integer(indChunkCoords[0]);
 				int chunkZ = new Integer(indChunkCoords[1]);
 				
+				System.out.println("Player chunk X"+targetPlayer.chunkCoordX +"Player chunk Z"+targetPlayer.chunkCoordZ+"    ChunkX: "+chunkX+ " ChunkZ "+chunkZ);
+				
 				if((targetPlayer.chunkCoordX == chunkX) && (targetPlayer.chunkCoordZ == chunkZ)){
 					
 					if(!(domainPlayerList.contains(targetPlayer))){
 						domainPlayerList.add(targetPlayer);
 					}
 
-				}else{/*REMOVE PLAYER FROM DOMAIN LIST */
-					if((domainPlayerList.contains(targetPlayer))){
-						domainPlayerList.remove(targetPlayer);
-					}
+				}
 				}
 	
 			}
-		}
+		
 		
 	}
 	
@@ -422,5 +487,17 @@ public class OverlordBlockTileEntity extends TileEntity {
 	   {
 		   readFromNBT(pkt.func_148857_g());
 	   }
+
+
+
+	public String getItemDesired() {
+		return itemDesired;
+	}
+
+
+
+	public void setItemDesired(String nameOfItemDesired) {
+		this.itemDesired = nameOfItemDesired;
+	}
 	
 }

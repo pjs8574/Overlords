@@ -73,7 +73,8 @@ public class OverlordBlock extends Block implements ITileEntityProvider{
 			OverlordBlockTileEntity tileentityOverlordBlock = (OverlordBlockTileEntity)wrld.getTileEntity(x, y, z);
 	
 			if(!wrld.isRemote){
-				player.addChatMessage(new ChatComponentText("I am Overlord "+tileentityOverlordBlock.overlordName +". My Domain is: " + tileentityOverlordBlock.getDomain()));
+				player.addChatMessage(new ChatComponentText("I am Overlord "+tileentityOverlordBlock.overlordName ));
+				player.addChatMessage(new ChatComponentText("I Currently Desire "+tileentityOverlordBlock.getItemDesired() ));
 			}
 			return true;
 	    }
