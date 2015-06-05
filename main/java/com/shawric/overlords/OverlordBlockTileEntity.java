@@ -34,7 +34,7 @@ public class OverlordBlockTileEntity extends TileEntity {
     
     private TileEntityChest[] chestArray = new TileEntityChest[6];
     
-	//the Overlord's domain
+
 	
 	
 	public String chunkListString = "z";
@@ -224,12 +224,13 @@ public class OverlordBlockTileEntity extends TileEntity {
 									if(this.totalAmountOfDesiredItem>0){
 										ItemStack eatenStack = this.chestArray[i].decrStackSize(i2,(this.totalAmountOfDesiredItem));
 										this.totalAmountOfDesiredItem=0;
-										this.overlordExpeirence = overlordExpeirence +.01;
+										this.overlordExpeirence += 1;
 										this.checkOverlordLevel();
 										this.hungerSatedLevel=5;
 										this.hungerLevel=0;
 										this.overlordHungerSatedBooleon = true;
 										this.sendMessageToDomain("MY HUNGER IS SATED....FOR NOW.");
+										this.sendMessageToDomain("I GAIN IN POWER:"+this.overlordExpeirence+"XP");
 										this.randomSetItemDesired();
 									}
 								}
@@ -239,57 +240,13 @@ public class OverlordBlockTileEntity extends TileEntity {
 			this.overlordHungerSatedBooleon = false;
 		}
 			
-			
-		
-		
-		
-		
-		
-		
-		
-		
-		
-						/*
-					
-						if(tstStack.getDisplayName().equalsIgnoreCase(this.getItemDesired()) && this.overlordHungerSatedBooleon==false){
-							
-							//need check stack size to see if its enough to satisfy hunger level
-							
-							ItemStack stackToEat = this.chestArray[i].getStackInSlot(i2);
-							
-							int howManyToEat = this.totalAmountOfDesiredItem;
-							
-							if(stackToEat.stackSize<howManyToEat || howManyToEat>64){
-								this.overlordHungerSatedBooleon = false;
-								//System.out.println("---I REQURE "+ ((howManyToEat-stackToEat.stackSize)+1) + " MORE "+itemDesired+"");
-								
-								this.sendMessageToDomain("I REQURE "+ ((howManyToEat-stackToEat.stackSize)+1) + " MORE "+this.getItemDesired()+"");
-								
-							}else{
-	
-							ItemStack eatenStack = this.chestArray[i].decrStackSize(i2,(howManyToEat));
-							
-							this.overlordExpeirence = overlordExpeirence +.01;
-							
-							this.checkOverlordLevel();
-							
-							this.hungerSatedLevel=5;
-							this.hungerLevel=0;
-							this.overlordHungerSatedBooleon = true;
-							this.sendMessageToDomain("MY HUNGER IS SATED....FOR NOW.");
-							
-							this.randomSetItemDesired();
-							}
-						}else{this.overlordHungerSatedBooleon = false;}
-						
-						
-						*/
-						
-		
+
 		
 	}
 	
 	private void checkOverlordLevel() {
+		
+		double checkXP = (this.overlordExpeirence/10);
 		
 		if((this.overlordExpeirence/10)>=this.overlordLevel){
 			
@@ -457,6 +414,7 @@ public class OverlordBlockTileEntity extends TileEntity {
 	      par1.setString("ChunkList", this.chunkListString );
 	      par1.setString("OverlordName", this.overlordName );
 	      par1.setInteger("OverlordLevel", this.overlordLevel);
+	      par1.setDouble("OverlordXP", this.overlordExpeirence);
 	      
 
 	   }
@@ -469,7 +427,7 @@ public class OverlordBlockTileEntity extends TileEntity {
 		   this.chunkListString = par1.getString("ChunkList");
 		   this.overlordName = par1.getString("OverlordName");
 		   this.overlordLevel = par1.getInteger("OverlordLevel");
-		  
+		   this.overlordExpeirence =par1.getDouble("OverlordXP");
 	    
 	   }
 	   
